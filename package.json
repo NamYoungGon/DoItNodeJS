@@ -1,0 +1,16 @@
+{
+  "name": "do-it-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "express-error-handler": "^1.1.0",
+    "express-session": "^1.15.6",
+    "moment": "^2.19.1",
+    "winston": "^2.4.0",
+    "winston-daily-rotate-file": "^1.7.2"
+  }
+}
