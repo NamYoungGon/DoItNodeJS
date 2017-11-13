@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>파일 업로드</title>
+    </head>
+    <body>
+        <h1>파일 업로드</h1>
+        <form method="post" action="/process/photo" enctype="multipart/form-data">
+            <p>
+                <label>파일</label>
+                <input type="file" name="photo" multiple />
+            </p>
+            <p>
+                <input type="submit" value="업로드" name="submit" />
+            </p>
+        </form>
+    </body>
+</html>
