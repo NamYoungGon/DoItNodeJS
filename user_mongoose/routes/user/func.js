@@ -1,32 +1,41 @@
 const UserModel = require('./../../db/models/User')
 
-const add = (id, password, name, callback) => {
-    console.log(`addUser 함수 호출 : ${id}, ${password}, ${name}`)
-
+const add = async (id, password, name, callback) => {
     const user = new UserModel({ id, password, name })
-    user.save((err) => {
-        if (err) {
-            callback(err, null)
-            return false
-        }
-
-        callback(null, user)
-    })
+    try {
+        const result = await user.save()
+    } catch (e) {
+        console.log('add 함수 에러 발생')
+    }
 }
 
-const auth = (id, password, callback) => {
-    console.log('authUser 함수 호출')
+const auth = async (id, password, callback) => {
+    try {
+        const result = await UserModel.findById(id, callback)
+    } catch (e) {
+        console.log('auth 함수 에러 발생')
+    }
+}
 
-    UserModel.find({ id, password }, (err, docs) => {
-        if (err) {
-            callback(err, null)
-        } else {
-            callback(null, docs)
-        }
-    })
+const update = async (id, password, name, callback) => {
+    try {
+        const result = await UserModel.findOneAndUpdate({ id, password }, { id, password, name }, callback)
+    } catch (e) {
+        console.log('update 함수 에러 발생')
+    }
+}
+
+const remove = async (id, password, callback) => {
+    try {
+        const result = await UserModel.findOneAndRemove({ id, password }, callback)
+    } catch (e) {
+        console.log('remove 함수 에러 발생')
+    }
 }
 
 module.exports = {
     add,
-    auth
+    auth,
+    update,
+    remove
 }

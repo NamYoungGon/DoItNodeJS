@@ -7,4 +7,8 @@ const UserSchema = Schema({
     name: String
 })
 
+UserSchema.statics.findById = function (id, callback) {
+    return this.findOne({ id }).exec(callback)
+}
+
 module.exports = mongoose.model('users', UserSchema)
