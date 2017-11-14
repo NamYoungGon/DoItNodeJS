@@ -105,16 +105,79 @@
 /*
     const mongoose = require('mongoose')
 
-    connect(uri, [options], [callback])
-    - mongoose 를 사용해 데이터베이스에 연결합니다.
-    - 연결 후에는 mongoose.connection 객체를 사용해 연결 관련 이벤트를 처리할 수 있습니다.
+    연결
+        connect(uri, [options], [callback])
+            - mongoose 를 사용해 데이터베이스에 연결합니다.
+            - 연결 후에는 mongoose.connection 객체를 사용해 연결 관련 이벤트를 처리할 수 있습니다.
 
-    Schema()
-    - 스키마를 정의하는 생성자입니다.
+    스키마
+        Schema()
+            - 스키마를 정의하는 생성자입니다.
+        
+        타입
+            - String, Number, Boolean, Array, Buffer, Date, Mixed
+
+        속성
+            - type : 자료형을 지정
+            - required : 값이 true 이면 반드시 들어가야 하는 속성이 됩니다.
+            - unique : 값이 true 이면 이 속성에 고유한 값이 들어가야 합니다.
+
+        예제
+            const UserSchema = new mongoose.Schema({
+                id: { type: String, required: true, unique: true },
+                password: { type: String, required: true },
+                name: String,
+                age: Number,
+                created_at: Date,
+                updated_at: Date
+            })
+
 
     model(name, [schema], [collection], [skiplnit])
-    - 모델을 정의합니다.
-    - [collection]이 정의되면 이 컬렉션을 사용하며, 지정하지 않으면 name으로 유추한 컬렉션을 사용합니다.
+        - 모델을 정의합니다.
+        - [collection]이 정의되면 이 컬렉션을 사용하며, 지정하지 않으면 name으로 유추한 컬렉션을 사용합니다.
+
+        find([criteria], [callback])
+            - 조회 조건을 사용해 컬렉션의 데이터를 조회합니다. 조회 결과는 콜백 함수로 전달됩니다.
+        save([options], [callback])
+            - 모델 인스턴스 객체의 데이터를 저장합니다. 저장 결과는 콜백 함수로 전달됩니다.
+        update([criteria], [doc], [options], [callback])
+            - 컬렉션의 데이터를 조회한 후 업데이트합니다. where() 메소드와 함께 사용됨
+        remove([criteria], [callback])
+            - 컬렉션의 데이터를 삭제합니다.
+
+        예제
+            UserModel.where({ id: 'aaa' }).update({ name: 'bbb' }, (err) => { })
+
+    빠른 성능을 위한 인덱스와 편리함을 위한 메소드 추가 기능
+        예제
+            const UserSchema = new mongoose.Schema({
+                id: { type: String, required: true, unique: true },
+                password: { type: String, required: true },
+                name: { type: String, index: 'hashed' },
+                age: Number,
+                created_at: { type: Date, index: { unique: false, expires: '1d' }}
+                updated_at: Date
+            })
+
+        static(name, fn)
+            - 모델 객체에서 사용할 수 있는 함수를 등록합니다.
+            - 함수의 이름과 함수 객체를 파라미터로 전달합니다.
+
+            find 의 결과는 배열, findOne 의 결과는 배열이 아님
+
+            예제 (Arrow Function 은 this 객체 참조 문제로 인해 사용 불가)
+                UserSchema.static('findById', function (id, callback) {
+                    return this.find({ id }, callback)
+                })
+                UserSchema.statics.findById = function (id, callback) {
+                    return this.findOne({ id }, callback)
+                }
+        
+        method(name, fn)
+            - 모텔 인스턴스 객체에서 사용할 수 있는 함수를 등록합니다.
+            - 함수의 이름과 함수 객체를 파라미터로 전달합니다.
+
 */
 
 /*
