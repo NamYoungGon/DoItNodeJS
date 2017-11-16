@@ -16,6 +16,20 @@ const mongoose = require('mongoose')
 
 let database
 
+const app = express()
+app.set('port', process.env.PORT || 3000)
+
+app.use('/', express.static(path.join(__dirname, 'public')))
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+app.use(cookieParser())
+app.use(expressSession({
+    secret: 'sdfdsfsf',
+    resave: false,
+    saveUninitialized: true
+}))
+
 function connectDB() {
     const databaseUrl = 'mongodb://admin:1234@ds257485.mlab.com:57485/doitnodejs'
 
@@ -35,27 +49,14 @@ function connectDB() {
     })
     
     database.on('error', console.error.bind(console.log, 'mongoose 연결 에러'))
+
+    app.set('database', database)
 }
 
 function createUserSchema(db) {
     db.UserSchema = require('./db/user_schema').createSchema(mongoose)
     db.UserModel = mongoose.model('users3', db.UserSchema)
 }
-
-
-const app = express()
-app.set('port', process.env.PORT || 3000)
-
-app.use('/', express.static(path.join(__dirname, 'public')))
-
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-app.use(cookieParser())
-app.use(expressSession({
-    secret: 'sdfdsfsf',
-    resave: false,
-    saveUninitialized: true
-}))
 
 const router = express.Router()
 const user = require('./routes/user')
@@ -65,51 +66,6 @@ router.route('/process/adduser').post(user.addUser)
 router.route('/process/listuser').post(user.listUser)
 
 app.use('/', router)
-
-const authUser = (db, id, password, callback) => {
-    console.log(`authUser 호출됨 : ${id}, ${password}`)
-
-    UserModel.findById(id, (err, results) => {
-
-        if (err) {
-            callback(err, null)
-            return false
-        }
-
-        console.log(`아이디 ${id}로 검색`)
-        
-        if (results) {
-            const user = new UserModel({ id })
-            console.dir(user)
-            const authenticated = user.authenticate(password, results.salt, results.hashed_password)
-
-            if (authenticated) {
-                console.log('패스워드 일치')
-                callback(null, results)
-            } else {
-                console.log('패스워드 일치하지 않음')
-                callback(null, null)
-            }
-        } else {
-            console.log('일치하는 아이디 사용자 없음')
-        }
-    })
-}
-
-const addUser = (db, id, password, name, callback) => {
-    console.log(`addUser 호출됨 : ${id}, ${password}, ${name}`)
-
-    const user = new UserModel({ id, password, name })
-    user.save((err) => {
-        if (err) {
-            callback(err, null)
-            return false
-        }
-
-        console.log('사용자 데이터 추가함')
-        callback(null, user)
-    })
-}
 
 // 404 에러 페이지 처리
 const errorHandler = expressErrorHandler({

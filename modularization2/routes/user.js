@@ -9,7 +9,7 @@ const login = (req, res) => {
 
 
     if (database) {
-        authUser(database, paramId, paramPassword, (err, docs) => {
+        auth(database, paramId, paramPassword, (err, docs) => {
             if (err) {
                 console.log('에러 발생')
 
@@ -55,7 +55,7 @@ const addUser = (req, res) => {
     console.log(`요청 파라미터 : ${paramId} ${paramPassword} ${paramName} `)
 
     if (database) {
-        addUser(database, paramId, paramPassword, paramName, (err, result) => {
+        add(database, paramId, paramPassword, paramName, (err, result) => {
             if (err) {
                 console.log('에러 발생')
 
@@ -141,7 +141,7 @@ const listUser = (req, res) => {
     }
 }
 
-const authUser = (db, id, password, callback) => {
+const auth = (db, id, password, callback) => {
     console.log(`authUser 호출됨 : ${id}, ${password}`)
 
     db.UserModel.findById(id, (err, results) => {
@@ -171,7 +171,7 @@ const authUser = (db, id, password, callback) => {
     })
 }
 
-const addUser = (db, id, password, name, callback) => {
+const add = (db, id, password, name, callback) => {
     console.log(`addUser 호출됨 : ${id}, ${password}, ${name}`)
 
     const user = new db.UserModel({ id, password, name })
