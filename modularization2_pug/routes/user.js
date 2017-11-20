@@ -25,9 +25,7 @@ const login = (req, res) => {
                     username: docs.name
                 }
 
-                res.render('login_success', context, (err, html) => {
-                   
-                })
+                res.render('login_success', context)
 
                 // res.writeHead(200, { 'Content-Type': 'text/html; charset=utf8;' })
                 // req.app.render('login_success', context, (err, html) => {

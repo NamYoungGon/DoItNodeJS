@@ -6,7 +6,7 @@ app.set('views', __dirname + '/views')
 app.set('view engine', 'pug')
 
 app.get('/', (req, res) => {
-    res.render('index')
+    res.render('index', { username: 'devgon' })
 })
 
 app.listen(3000, () => {
