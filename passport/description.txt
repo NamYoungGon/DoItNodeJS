@@ -1,0 +1,6 @@
+메소드가 호출되는 방식
+
+-> 클라이언트(웹브라우저)
+-> 웹서버에 인증요청
+-> Passport 모듈 (req.user)
+-> 인증 성공 시 serializeUser, 로그인 상태인 경우 deserializeUser 호출됨
