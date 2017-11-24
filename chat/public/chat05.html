@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>채팅 클라이언트 05</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+</head>
+<body>
+    <h3>채팅 클라이언트 05</h3>
+    <br/>
+    <div>
+        <h4>서버 연결</h4>
+        <input type="text" id="hostInput" value="localhost" />
+        <input type="text" id="portInput" value="3000" />
+        <button id="connectButton">연결하기</button>
+    </div>
+    <br/>
+    <div>
+        <h4>로그인</h4>
+        <input type="text" id="idInput" />
+        <input type="password" id="passwordInput" />
+        <input type="text" id="aliasInput" />
+        <input type="text" id="todayInput" />
+        <button id="loginButton">로그인</button>
+        <button id="logoutButton">로그아웃</button>
+    </div>
+    <br/>
+    <div>
+        <h4>메시지 전송</h4>
+        <div>
+            <span>보내는 사람: </span>
+            <input type="text" id="senderInput" />
+        </div>
+        <div>
+            <span>받는 사람: </span>
+            <input type="text" id="recepientInput" value="ALL" />
+        </div>
+        <div>
+            <span>전송할 데이터: </span>
+            <input type="text" id="dataInput" />
+        </div>
+        <select name="chattype" id="chattype">
+            <option value="chat">채팅</option>
+            <option value="groupchat">그룹채팅</option>
+        </select>
+        <br/>
+        <button id="sendButton">전송</button>
+    </div>
+    <br/>
+    <div>
+        <h4>방 리스트</h4>
+        <div id="roomList"></div>
+        <br/>
+        <button id="joinRoomButton">방 입장하기</button>
+        <button id="leaveRoomButton">방 나가기</button>
+        <br/>
+        <h4>방 만들기</h4>
+        <div>
+            <span>방 아이디 : </span>
+            <input type="text" id="roomIdInput" value="meeting01" />
+        </div>
+        <div>
+            <span>방 이름 : </span>
+            <input type="text" id="roomNameInput" value="청춘들의 대화" />
+        </div>
+        <button id="createRoomButton">방 생성</button>
+        <button id="updateRoomButton">방 이름 변경</button>
+        <button id="deleteRoomButton">방 삭제</button>
+    </div>
+    <p>결과</p>
+    <div id="results"></div>
+    <script>
+        
+        let socket
+
+        function connect() {
+            const host = hostInput.value
+            const port = portInput.value
+
+            connectToServer(host, port)
+        }
+
+        function connectToServer(host, port) {
+            const url = `http://${host}:${port}`
+            const options = {
+                // 연결을 항상 새로 만들어라 (연결이 끊어지게 되면 다시 만들어라)
+                forceNew: true
+            }
+            
+            socket = io.connect(url, options)
+            
+            socket.on('connect', () => {
+                println(`웹소켓 서버 연결 -> ${url}`)
+            })
+
+            socket.on('disconnect', () => {
+                println('웹소켓 서버 종료')
+            })
+
+            socket.on('message', (message) => {
+                println(`수신 -> ${JSON.stringify(message)}`)
+            })
+
+            socket.on('response', (response) => {
+                println(`응답 -> ${JSON.stringify(response)}`)
+            })
+
+            socket.on('room', (input) => {
+                if (input.command === 'list') {
+                    roomList.innerHTML = ''
+
+                    for (let i = 0; i < input.rooms.length; i++) {
+                        let { id, name, owner } = input.rooms[i]
+                        $(roomList).append(`<p>방 #${i} -> ${id}, ${name}, ${owner}</p>`)
+                    }
+                }
+            })
+        }
+
+        function login() {
+            const id = idInput.value
+            const password = passwordInput.value
+            const alias = aliasInput.value
+            const today = todayInput.value
+
+            const output = {
+                id,
+                password,
+                alias,
+                today
+            }
+            socket.emit('login', output)
+        }
+
+        function send() {
+            const message = {
+                sender: senderInput.value,
+                recepient: recepientInput.value,
+                data: dataInput.value,
+                command: chattype.value,
+                type: 'text'
+            }
+
+            socket.emit('message', message)
+        }
+
+        function println(data) {
+            $(results).append(`<p>${data}</p>`)
+        }
+
+        function createRoom() {
+            const roomId = roomIdInput.value
+            const roomName = roomNameInput.value
+            const id = idInput.value
+
+            const output = {
+                roomId,
+                roomName,
+                command: 'create',
+                roomOwner: id
+            }
+
+            socket.emit('room', output)
+        }
+        
+        function updateRoom() {
+            const roomId = roomIdInput.value
+            const roomName = roomNameInput.value
+            const id = idInput.value
+    
+            const output = {
+                roomId,
+                roomName,
+                command: 'update',
+                roomOwner: id
+            }
+    
+            socket.emit('room', output)
+        }
+        
+        function deleteRoom() {
+            const roomId = roomIdInput.value
+            const id = idInput.value
+    
+            const output = {
+                roomId,
+                roomName: '',
+                command: 'delete',
+                roomOwner: id
+            }
+    
+            socket.emit('room', output)   
+        }
+
+        function joinRoom() {
+            const roomId = roomIdInput.value
+            
+            const output = {
+                command: 'join',
+                roomId
+            }
+
+            socket.emit('room', output)
+        }
+        
+        function leaveRoom() {
+            const roomId = roomIdInput.value
+            
+            const output = {
+                command: 'leave',
+                roomId
+            }
+    
+            socket.emit('room', output)
+        }
+
+        $(function () {
+            $(connectButton).click(connect)
+            $(sendButton).click(send)
+            $(loginButton).click(login)
+            $(createRoomButton).click(createRoom)
+            $(updateRoomButton).click(updateRoom)
+            $(deleteRoomButton).click(deleteRoom)
+            $(joinRoomButton).click(joinRoom)
+            $(leaveRoomButton).click(leaveRoom)
+        })
+    </script>
+</body>
+</html>
